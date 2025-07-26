@@ -88,4 +88,5 @@ jobs:
           version: ${{ env.ADDON_VERSION }}
           zip_file: ${{ env.ZIP_FULL_NAME }}
           changelog_file: 'CHANGELOG.md'
+          description_file: 'README_ESOUI.txt'
           test: true
