@@ -6,7 +6,7 @@ on:
   #  - cron: "7 5 * * 0"
   push:
     branches:
-      - main
+      - release
 
 jobs:
   release:
