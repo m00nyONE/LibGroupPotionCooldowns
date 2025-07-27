@@ -1,4 +1,8 @@
 --- general initialization
+---@class LibGroupPotionCooldowns
+---@field name string The name of the library
+---@field version string The version of the library
+---@field RegisterAddon fun(addonName: string): _PotionStatsObject? Registers an addon and returns a new potion stats object instance
 local lib = {
     name = "LibGroupPotionCooldowns",
     version = "dev",
@@ -63,6 +67,22 @@ local function Log(category, level, ...)
 end
 
 --- Main Library
+
+---@class PotionData
+---@field lastUpdated number
+---@field isOnCooldown boolean
+---@field cooldownDurationMS number
+---@field hasCooldownUntil number
+
+---@class UnitPotionStats
+---@field tag string
+---@field name string
+---@field displayName string
+---@field isPlayer boolean
+---@field isOnline boolean
+---@field potionData PotionData
+
+---@type table<string, UnitPotionStats>
 local groupStats = {
     [PLAYER_CHARACTER_NAME] = {
         tag = localPlayer,
@@ -80,17 +100,19 @@ local groupStats = {
     }
 }
 
+---@class _PotionStatsObject
 local _PotionStatsObject = {}
 _PotionStatsObject.__index = _PotionStatsObject
 
--- Constructor for the _CombatStatsObject
--- @return (table): A new instance of _PotionStatsObject
+---Creates a new _PotionStatsObject instance
+---@return _PotionStatsObject
 function _PotionStatsObject:New()
     local obj = setmetatable({}, _PotionStatsObject)
     return obj
 end
--- Returns key, value of groupStats
--- @return (string, table): key value pairs of groupStats
+
+---Iterates over group stats
+---@return fun():string, UnitPotionStats
 function _PotionStatsObject:Iterate()
     local key, value
     return function()
@@ -110,21 +132,26 @@ function _PotionStatsObject:Iterate()
         }
     end
 end
--- metatable version of _PotionStatsObject:Iterate()
+
+---Provides iteration for pairs()
 function _PotionStatsObject:__pairs()
     return self:Iterate()
 end
--- Returns the number of group members in "groupStats"
--- @return (number): the number of units in the group
+
+---Returns the number of group members
+---@return number
 function _PotionStatsObject:GetGroupSize()
     return #groupStats
 end
--- metatable version of _PotionStatsObject:GetGroupSize()
+
+---Provides group size for # operator
+---@return number
 function _PotionStatsObject:__len()
     return self:GetGroupSize()
 end
--- Retrieves a copy of the current group statistics
--- @return (table): A table containing group statistics (cloned from the internal state)
+
+---Returns a copy of all group stats
+---@return table<string, UnitPotionStats>
 function _PotionStatsObject:GetGroupStats()
     local result = {}
     for tag, stats in self:Iterate() do
@@ -133,9 +160,10 @@ function _PotionStatsObject:GetGroupStats()
 
     return result
 end
--- Retrieves statistics for a specific unit in the group
--- @param unitTag (string): The unitTag of the group member (e.g., "group1")
--- @return (table or nil): A table containing the unit's statistics, or nil if the unit is not found
+
+---Gets potion data for a given unit
+---@param unitTag string
+---@return UnitPotionStats|nil
 function _PotionStatsObject:GetUnitPotionData(unitTag)
     local characterName = GetUnitName(unitTag)
     local unit = groupStats[characterName]
@@ -154,6 +182,10 @@ function _PotionStatsObject:GetUnitPotionData(unitTag)
 
     return result
 end
+
+---Returns remaining cooldown in milliseconds for a unit
+---@param unitTag string
+---@return number|nil
 function _PotionStatsObject:GetUnitRemainingCooldownMS(unitTag)
     local characterName = GetUnitName(unitTag)
     local unit = groupStats[characterName]
@@ -165,6 +197,10 @@ function _PotionStatsObject:GetUnitRemainingCooldownMS(unitTag)
     local result = zo_max(0, t - unit.hasCooldownUntil)
     return result
 end
+
+---Checks if a unit is currently on cooldown
+---@param unitTag string
+---@return boolean|nil
 function _PotionStatsObject:IsUnitOnCooldown(unitTag)
     local characterName = GetUnitName(unitTag)
     local unit = groupStats[characterName]
@@ -175,9 +211,9 @@ function _PotionStatsObject:IsUnitOnCooldown(unitTag)
     return unit.potionData.isOnCooldown
 end
 
--- Registers a callback function for a specified event
--- @param eventName (string): The name of the event to register for
--- @param callback (function): The function to be called when the event is triggered
+---Registers a callback for a local event
+---@param eventName string
+---@param callback fun(tag: string, data: PotionData)
 function _PotionStatsObject:RegisterForEvent(eventName, callback)
     assert(type(callback) == "function", "callback must be a function")
     assert(type(eventName) == "string", "eventName must be a string")
@@ -185,9 +221,10 @@ function _PotionStatsObject:RegisterForEvent(eventName, callback)
     LocalEM:RegisterCallback(eventName, callback)
     Log("events", LOG_LEVEL_DEBUG, "callback for %s registered", eventName)
 end
--- Unregisters a callback function for a specified event
--- @param eventName (string): The name of the event to unregister from
--- @param callback (function): The callback function to unregister
+
+---Unregisters a callback for a local event
+---@param eventName string
+---@param callback fun(tag: string, data: PotionData)
 function _PotionStatsObject:UnregisterForEvent(eventName, callback)
     assert(type(callback) == "function", "callback must be a function")
     assert(type(eventName) == "string", "eventName must be a string")
@@ -306,6 +343,9 @@ local function onMessageCooldownUpdateReceived(tag, data)
     end, totalCooldown)
 end
 
+---Registers the addon with the library
+---@param addonName string
+---@return _PotionStatsObject|nil
 function lib.RegisterAddon(addonName)
     if not addonName then
         Log("main", LOG_LEVEL_ERROR, "addonName must be provided")
