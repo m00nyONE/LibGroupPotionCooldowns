@@ -138,4 +138,4 @@ end)
 
 ## 💬 Feedback & Contribution
 
-Feel free to open issues or submit PRs. For questions, contact the author in-game or via GitHub.
+Feel free to open issues or submit PRs via GitHub.

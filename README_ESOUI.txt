@@ -119,9 +119,10 @@ end)
 [list]
 [*]Potion cooldowns are detected via [b]EVENT_INVENTORY_ITEM_USED[/b]
 [*]Updates are broadcast via [b]LibGroupBroadcast[/b]
+[*]The library tries to calculate the time when the message should arrive by counting in the cooldown of the Broadcast API.
 [*]Cooldown messages are throttled and synchronized to reduce spam
 [/list]
 
 [size="4"][b] Feedback & Contribution[/b][/size]
 
-For issues or feature requests, feel free to submit them on GitHub or contact me in-game.
+For issues or feature requests, feel free to submit them on [url=https://github.com/m00nyONE/LibGroupPotionCooldowns]GitHub[/url].
