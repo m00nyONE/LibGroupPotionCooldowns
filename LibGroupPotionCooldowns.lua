@@ -13,8 +13,6 @@ local EM = EVENT_MANAGER
 local LocalEM = ZO_CallbackObject:New()
 local localPlayer = "player"
 
-local _isFirstOnPlayerActivated = true
-local _sendSyncRequest = true
 local _LGBHandler = {}
 local _LGBProtocols = {}
 local _registeredAddons = {}
