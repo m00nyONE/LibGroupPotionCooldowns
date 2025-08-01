@@ -16,6 +16,7 @@ local LGB = LibGroupBroadcast
 local EM = EVENT_MANAGER
 local LocalEM = ZO_CallbackObject:New()
 local localPlayer = "player"
+local strfmt = string.format
 
 local _LGBHandler = {}
 local _LGBProtocols = {}
@@ -343,21 +344,32 @@ local function onMessageCooldownUpdateReceived(tag, data)
     end, totalCooldown)
 end
 
+local function enablePotionCooldownBroadcast()
+    EM:RegisterForEvent(lib_name .. "onDrink", EVENT_INVENTORY_ITEM_USED, onInventoryItemUsed)
+    EM:AddFilterForEvent(lib_name .. "onDrink", EVENT_INVENTORY_ITEM_USED, REGISTER_FILTER_UNIT_TAG, localPlayer)
+end
+local function disablePotionCooldownBroadcast()
+    EM:UnregisterForEvent(lib_name .. "onDrink", EVENT_INVENTORY_ITEM_USED)
+end
+
 ---Registers the addon with the library
 ---@param addonName string
 ---@return _PotionStatsObject|nil
 function lib.RegisterAddon(addonName)
     if not addonName then
-        Log("main", LOG_LEVEL_ERROR, "addonName must be provided")
+        error("addonName must be provided", 2)
         return nil
     end
 
     if _registeredAddons[addonName] then
-        Log("debug", LOG_LEVEL_ERROR, "Addon %s tried to register multiple times", addonName)
+        error(strfmt("Addon %s tried to register multiple times", addonName), 2)
         return nil
     end
 
     _registeredAddons[addonName] = true
+
+    disablePotionCooldownBroadcast()
+    enablePotionCooldownBroadcast()
 
     Log("debug", LOG_LEVEL_INFO, "Addon " .. addonName .. " registered.")
     return _PotionStatsObject:New()
@@ -373,8 +385,6 @@ local function onPlayerActivated()
     unregisterGroupEvents()
     registerGroupEvents()
 
-    EM:RegisterForEvent(lib_name .. "onDrink", EVENT_INVENTORY_ITEM_USED, onInventoryItemUsed)
-    EM:AddFilterForEvent(lib_name .. "onDrink", EVENT_INVENTORY_ITEM_USED, REGISTER_FILTER_UNIT_TAG, localPlayer)
 end
 
 local function declareLGBProtocols()
