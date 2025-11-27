@@ -1,3 +1,6 @@
+## 2025.11.27
+- console release
+
 ## 2025.08.01
 - only broadcast if an addon using this library is registered
 
