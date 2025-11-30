@@ -108,7 +108,7 @@ jobs:
         with:
           BNET_USERNAME: ${{ secrets.BNET_USERNAME }}
           BNET_PASSWORD: ${{ secrets.BNET_PASSWORD }}
-          addon_id: ""
+          addon_id: "c75ace9c-ba19-4bce-b7b1-4793854c4754"
           version: ${{ needs.create-addon-zip.outputs.addon_version }}
           zip_file: ${{ needs.create-addon-zip.outputs.zip_console }}
           release_notes_file: ${{ needs.create-release-notes.outputs.release_notes }}
