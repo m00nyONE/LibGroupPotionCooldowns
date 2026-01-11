@@ -43,8 +43,7 @@ lib.EVENT_GROUP_COOLDOWN_UPDATE = EVENT_GROUP_COOLDOWN_UPDATE
 local PLAYER_CHARACTER_NAME = GetUnitName(localPlayer)
 local PLAYER_DISPLAY_NAME = GetUnitDisplayName(localPlayer)
 
-if LibDebugLogger then
-    if IsConsoleUI() then return end
+if LibDebugLogger and not IsConsoleUI() then
     mainLogger = LibDebugLogger.Create(lib_name)
 
     LOG_LEVEL_ERROR = LibDebugLogger.LOG_LEVEL_ERROR
